@@ -1,1 +1,3 @@
-Workout
+Shopping;true
+Clean;true
+Workout;false

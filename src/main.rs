@@ -8,6 +8,14 @@ const FILE_NAME: &str = "tasks.txt";
 struct Task {
     description: String,
     completed: bool, 
+    category: Category
+}
+
+#[derive(Debug, Clone)]
+enum Category{
+    Work,
+    Personal,
+    Other
 }
 
 fn main() {
@@ -45,10 +53,15 @@ fn main() {
 }
 
 fn save_tasks(tasks: &Vec<Task>){
-    let mut file = File::create(FILE_NAME).expect("Unable to craete file.");
+    let mut file = File::create(FILE_NAME).expect("Unable to create file.");
 
     for task in tasks{
-        writeln!(file, "{};{}", task.description, task.completed).expect("Unable to write to file!");
+        let category = match task.category {
+            Category::Work => "Work",
+            Category::Personal => "Personal",
+            Category::Other => "Other",
+        };
+        writeln!(file, "{};{};{}", task.description, task.completed, category).expect("Unable to write to file!");
     }
 }
 
@@ -61,10 +74,15 @@ fn load_tasks() -> Vec<Task>{
         for line in reader.lines(){
             if let Ok(entry) = line{
                 let parts: Vec<&str> = entry.split(';').collect();
-                if parts.len() == 2 {
-                    let description = parts[0].to_string();
-                    let completed = parts[1] == "true";
-                    tasks.push(Task {description, completed});
+                if parts.len() == 3 {
+                    let description: String = parts[0].to_string();
+                    let completed: bool = parts[1] == "true";
+                    let category = match parts[2] {
+                        "Work" => Category::Work,
+                        "Personal" => Category::Personal,
+                        _ => Category::Other,
+                    };
+                    tasks.push(Task {description, completed, category});
                 }
             }
         }
@@ -74,15 +92,27 @@ fn load_tasks() -> Vec<Task>{
 
 fn add_task(tasks: &mut Vec<Task>){
     print!("\nEnter a Task: ");
-
     io::stdout().flush().unwrap();
 
     let mut task = String::new();
     io::stdin().read_line(&mut task).expect("Failed to read task.");
 
+    println!("Choose a category: (1) Work, (2) Personal, (3) Other");
+    io::stdout().flush().unwrap();
+
+    let mut category_input = String::new();
+    io::stdin().read_line(&mut category_input).expect("Failed to read input");
+
+    let category = match category_input.trim() {
+        "1" => Category::Work,
+        "2" => Category::Personal,
+        _ => Category::Other,
+    };
+
     tasks.push(Task {
         description: task.trim().to_string(),
         completed: false,
+        category,
     });
 
     save_tasks(tasks);
@@ -104,6 +134,7 @@ fn view_tasks(tasks: &Vec<Task>){
 fn remove_task(tasks: &mut Vec<Task>){
     if tasks.is_empty(){
         println!("No tasks to remove.");
+        return;
     }
 
     view_tasks(tasks);
@@ -159,6 +190,6 @@ fn edit_task(tasks: &mut Vec<Task>){
             save_tasks(tasks);
             println!("Task {} updated successfully!", index);
         }
-        _ => { println!("Task updated successfully!") },
+        _ => { println!("Invalid Task!") },
     }
 }

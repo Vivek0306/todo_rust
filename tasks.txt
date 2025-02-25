@@ -1,7 +1,3 @@
-Shopping;true
-Clean;true
-Workout at Gym;true
-Buy Groceries;false
-Clean Dishes;false
-Cut Grass;false
-Smoke Pot;false
+Help Neighbour;false;Personal
+Clean dishes;false;Work
+Do Laundry;false;Other

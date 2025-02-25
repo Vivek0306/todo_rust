@@ -1,5 +1,6 @@
 use std::io::{self, Write, BufRead};
 use std::fs::{File};
+use colored::*;
 
 const FILE_NAME: &str = "tasks.txt";
 
@@ -16,9 +17,9 @@ fn main() {
     println!("Welcome to To-Do List App!");
 
     loop{
-        println!("\nTo-Do List:");
+        println!("\n{}", "To-Do List:".cyan().bold().underline());
         view_tasks(&tasks);
-        println!("\nOptions: (1) Add Task (2) Mark Complete (3) Remove Task  (4) Exit");
+        println!("\nOptions: ({}) Add Task ({}) Mark Complete ({}) Edit Task ({}) Remove Task  ({}) Exit", "1".cyan(), "2".cyan(), "3".cyan(), "4".cyan(), "5".cyan());
 
         print!("Enter a choice: ");
 
@@ -32,9 +33,10 @@ fn main() {
         match choice {
             "1" => add_task(&mut tasks),
             "2" => mark_task_complete(&mut tasks),
-            "3" => remove_task(&mut tasks),
-            "4" => {
-                println!("Exiting....");
+            "3" => edit_task(&mut tasks),
+            "4" => remove_task(&mut tasks),
+            "5" => {
+                println!("{}", "Exiting....".red().blink());
                 break;
             },
             _ => println!("Invalid Choice!!")
@@ -93,8 +95,8 @@ fn view_tasks(tasks: &Vec<Task>){
         return;
     } else{
         for (i, task) in tasks.iter().enumerate() {
-            let status = if task.completed { "✓" } else { " " }; // Shows check mark for completed tasks
-            println!("{}. [{}] {}", i + 1, status, task.description);
+            let status = if task.completed { "[✓]".green() } else { "[ ]".yellow() }; // Shows check mark for completed tasks
+            println!("{}. {} {}", (i + 1).to_string().cyan(), status, task.description);
         }
     }
 }
@@ -105,7 +107,7 @@ fn remove_task(tasks: &mut Vec<Task>){
     }
 
     view_tasks(tasks);
-    print!("Enter the task number to remove: ");
+    print!("\nEnter the task number to remove: ");
     io::stdout().flush().unwrap();
 
     let mut input = String::new();
@@ -122,7 +124,7 @@ fn remove_task(tasks: &mut Vec<Task>){
 }
 
 fn mark_task_complete(tasks: &mut Vec<Task>){
-    print!("Enter task number to mark as complete: ");
+    print!("\nEnter task number to mark as complete: ");
     io::stdout().flush().unwrap();
 
     let mut input = String::new();
@@ -135,5 +137,28 @@ fn mark_task_complete(tasks: &mut Vec<Task>){
             println!("Task {} marked completed!", index);
         }
         _ => println!("Invalid task number!"),
+    }
+}
+
+fn edit_task(tasks: &mut Vec<Task>){
+    print!("\nEnter the task number to edit: ");
+    io::stdout().flush().unwrap();
+
+    let mut input = String::new();
+    io::stdin().read_line(&mut input).expect("Failed to read input!");
+
+    match input.trim().parse::<usize>(){
+        Ok(index) if index > 0 && index <= tasks.len() => {
+            print!("Enter new description: ");
+            io::stdout().flush().unwrap();
+
+            let mut new_desc = String::new();
+            io::stdin().read_line(&mut new_desc).expect("Failed to read input!");
+
+            tasks[index - 1].description = new_desc.trim().to_string();
+            save_tasks(tasks);
+            println!("Task {} updated successfully!", index);
+        }
+        _ => { println!("Task updated successfully!") },
     }
 }

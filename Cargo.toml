@@ -2,7 +2,7 @@
 name = "rust_todo"
 version = "0.1.0"
 edition = "2024"                  
-authors = ["Vivek Manojkumar Nair"] 
+authors = ["Vivek Nair"] 
 description = "A simple To-Do List CLI application written in Rust."
 license = "MIT"                     
 readme = "README.md"                
